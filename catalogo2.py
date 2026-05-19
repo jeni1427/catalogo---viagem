@@ -8,7 +8,7 @@ st.set_page_config(page_title="Catálogo de Viagens", layout="wide")
 st.markdown(
     """
     <h1 style='
-    color:white;
+    color:black;
     padding:20px;
     border-radius:20px;
     text-align:center;
