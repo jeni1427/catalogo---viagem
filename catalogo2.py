@@ -10,7 +10,7 @@ st.markdown(
     <h1 style='
     color:black;
     padding:20px;
-    border-radius:20px;
+    border-radius:20px;git 
     text-align:center;
     font-size:50px;
     box-shadow:0px 0px 20px rgba(0,0,0,0.3);
@@ -142,7 +142,7 @@ if st.session_state.imagem_aberta:
     st.markdown(
     """
     <h1 style='
-    color:white;
+    color:black;
     padding:20px;
     border-radius:20px;
     text-align:center;
