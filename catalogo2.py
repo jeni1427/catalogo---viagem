@@ -5,6 +5,14 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Catálogo de Viagens", layout="wide")
 
+imagem_topo = Image.open("logo2.jpeg")
+
+st.set_page_config(
+    page_title="Catálogo de Viagens",
+    page_icon="logo2.jpeg",
+    layout="wide"
+)
+
 #st.markdown(
     #"""
    # <h1 style='
@@ -20,7 +28,6 @@ st.set_page_config(page_title="Catálogo de Viagens", layout="wide")
     #""",
    # unsafe_allow_html=True
 #)
-imagem_topo = Image.open("logo2.jpeg")
 
 st.image(imagem_topo, width="stretch")
 
