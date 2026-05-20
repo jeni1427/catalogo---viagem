@@ -5,21 +5,24 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Catálogo de Viagens", layout="wide")
 
-st.markdown(
-    """
-    <h1 style='
-    color:black;
-    padding:20px;
-    border-radius:20px;git 
-    text-align:center;
-    font-size:50px;
-    box-shadow:0px 0px 20px rgba(0,0,0,0.3);
-    '>
-    Agenda de Viagens da J.M.J Turismo
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
+#st.markdown(
+    #"""
+   # <h1 style='
+    #color:black;
+    #padding:20px;
+    #border-radius:20px;git 
+   # text-align:center;
+    #font-size:50px;
+    #box-shadow:0px 0px 20px rgba(0,0,0,0.3);
+   #'>
+    #Agenda de Viagens da J.M.J Turismo
+    #</h1>
+    #""",
+   # unsafe_allow_html=True
+#)
+imagem_topo = Image.open("logo2.jpeg")
+
+st.image(imagem_topo, width="stretch")
 
 pasta = "folders"
 os.makedirs(pasta, exist_ok=True)
