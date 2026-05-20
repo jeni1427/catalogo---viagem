@@ -7,14 +7,6 @@ st.set_page_config(page_title="Catálogo de Viagens", page_icon="logo2.jpeg",lay
 
 imagem_topo = Image.open("logo2.jpeg")
 
-st.markdown("""
-<head>
-<meta property="og:title" content="Catálogo de Viagens" />
-<meta property="og:description" content="Conheça os pacotes da JmJ turismo" />
-<meta property="og:image" content="https://raw.githubusercontent.com/jeni1427/catalogo---viagem/refs/heads/main/logo2.jpeg" />
-</head>
-""", unsafe_allow_html=True)
-
 st.image(imagem_topo, width="stretch")
 
 pasta = "folders"
