@@ -3,9 +3,9 @@ from PIL import Image
 import os
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Catálogo de Viagens", page_icon="logo2.jpeg",layout="wide")
+st.set_page_config(page_title="Catálogo de Viagens", page_icon="logo3.jpeg",layout="wide")
 
-imagem_topo = Image.open("logo2.jpeg")
+imagem_topo = Image.open("logo3.jpeg")
 
 st.image(imagem_topo, width="stretch")
 
