@@ -3,31 +3,17 @@ from PIL import Image
 import os
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Catálogo de Viagens", layout="wide")
+st.set_page_config(page_title="Catálogo de Viagens", page_icon="logo2.jpeg",layout="wide")
 
 imagem_topo = Image.open("logo2.jpeg")
 
-st.set_page_config(
-    page_title="Catálogo de Viagens",
-    page_icon="logo2.jpeg",
-    layout="wide"
-)
-
-#st.markdown(
-    #"""
-   # <h1 style='
-    #color:black;
-    #padding:20px;
-    #border-radius:20px;git 
-   # text-align:center;
-    #font-size:50px;
-    #box-shadow:0px 0px 20px rgba(0,0,0,0.3);
-   #'>
-    #Agenda de Viagens da J.M.J Turismo
-    #</h1>
-    #""",
-   # unsafe_allow_html=True
-#)
+st.markdown("""
+<head>
+<meta property="og:title" content="Catálogo de Viagens" />
+<meta property="og:description" content="Conheça os pacotes da JmJ turismo" />
+<meta property="og:image" content="https://catalogo---viagem-jhtaq6fqzglkqin4xexqbm.streamlit.app/" />
+</head>
+""", unsafe_allow_html=True)
 
 st.image(imagem_topo, width="stretch")
 
