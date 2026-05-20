@@ -11,7 +11,7 @@ st.markdown("""
 <head>
 <meta property="og:title" content="Catálogo de Viagens" />
 <meta property="og:description" content="Conheça os pacotes da JmJ turismo" />
-<meta property="og:image" content="https://catalogo---viagem-jhtaq6fqzglkqin4xexqbm.streamlit.app/" />
+<meta property="og:image" content="https://raw.githubusercontent.com/jeni1427/catalogo---viagem/refs/heads/main/logo2.jpeg" />
 </head>
 """, unsafe_allow_html=True)
 
