@@ -1,18 +1,86 @@
 import streamlit as st
 from PIL import Image
-import os
-import streamlit.components.v1 as components
+import requests
+import gspread
+from google.oauth2.service_account import Credentials
 
-st.set_page_config(page_title="Catálogo de Viagens", page_icon="logo3.png",layout="wide")
+st.set_page_config(
+    page_title="Catálogo de Viagens",
+    page_icon="logo3.png",
+    layout="wide"
+)
 
 imagem_topo = Image.open("logo3.png")
-
 st.image(imagem_topo, width="stretch")
 
-pasta = "folders"
-os.makedirs(pasta, exist_ok=True)
+senha_admin = "1326"
 
-senha_admin = "1326"  # troque por uma senha sua
+
+def conectar_planilha():
+    escopos = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    credenciais = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=escopos
+    )
+
+    cliente = gspread.authorize(credenciais)
+
+    planilha = cliente.open_by_key(
+        st.secrets["GOOGLE_SHEET_ID"]
+    )
+
+    return planilha.sheet1
+
+
+def carregar_imagens():
+    aba = conectar_planilha()
+    return aba.get_all_records()
+
+
+def salvar_imagem_na_planilha(url, delete_url, nome):
+    aba = conectar_planilha()
+    aba.append_row([url, delete_url, nome])
+
+
+def remover_imagem_da_planilha(numero_da_linha):
+    aba = conectar_planilha()
+    aba.delete_rows(numero_da_linha)
+
+
+def enviar_para_imgbb(arquivo):
+    url = "https://api.imgbb.com/1/upload"
+
+    payload = {
+        "key": st.secrets["IMGBB_API_KEY"]
+    }
+
+    files = {
+        "image": arquivo.getvalue()
+    }
+
+    resposta = requests.post(
+        url,
+        data=payload,
+        files=files
+    )
+
+    resultado = resposta.json()
+
+    if not resultado.get("success"):
+        st.error("Erro ao enviar imagem para o ImgBB.")
+        st.write(resultado)
+        return None
+
+    return {
+        "url": resultado["data"]["url"],
+        "delete_url": resultado["data"].get("delete_url", ""),
+        "nome": arquivo.name
+    }
+
 
 with st.sidebar:
     st.subheader("Área administrativa")
@@ -23,6 +91,14 @@ with st.sidebar:
     )
 
     admin_logado = senha == senha_admin
+
+
+if "imagem_aberta" not in st.session_state:
+    st.session_state.imagem_aberta = None
+
+if "nome_aberto" not in st.session_state:
+    st.session_state.nome_aberto = None
+
 
 if admin_logado:
     st.subheader("Adicionar novo folder")
@@ -35,91 +111,70 @@ if admin_logado:
 
     if arquivos_enviados:
         for arquivo in arquivos_enviados:
-            caminho = os.path.join(pasta, arquivo.name)
+            dados_imagem = enviar_para_imgbb(arquivo)
 
-            with open(caminho, "wb") as f:
-                f.write(arquivo.getbuffer())
+            if dados_imagem:
+                salvar_imagem_na_planilha(
+                    dados_imagem["url"],
+                    dados_imagem["delete_url"],
+                    dados_imagem["nome"]
+                )
 
-        st.success("Folders adicionados com sucesso!")        
+        st.success("Folders adicionados com sucesso!")
+        st.rerun()
 
-arquivos = os.listdir(pasta)
 
-imagens = [
-    arquivo for arquivo in arquivos
-    if arquivo.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))
-]
+imagens = carregar_imagens()
 
-if "imagem_aberta" not in st.session_state:
-    st.session_state.imagem_aberta = None
+if not imagens:
+    st.info("Nenhum folder cadastrado ainda.")
 
-if "arquivo_aberto" not in st.session_state:
-    st.session_state.arquivo_aberto = None
 
 colunas = st.columns(3)
 
-for i, arquivo in enumerate(imagens):
-    caminho = os.path.join(pasta, arquivo)
+for i, imagem in enumerate(imagens):
+    url_imagem = imagem["url"]
+    nome_imagem = imagem.get("nome", f"Imagem {i + 1}")
+
+    linha_planilha = i + 2
 
     with colunas[i % 3]:
-        imagem = Image.open(caminho)
+        st.image(url_imagem, width="stretch")
 
-        st.image(imagem, width="stretch")
+        if st.button("Abrir", key=f"abrir_{i}"):
+            st.session_state.imagem_aberta = url_imagem
+            st.session_state.nome_aberto = nome_imagem
 
-        if st.button(
-            "Abrir",
-            key=f"abrir_{arquivo}"
-        ):
-
-            st.session_state.imagem_aberta = caminho
-            st.session_state.arquivo_aberto = arquivo
-
-        # botão para ir até imagem grande
-        if st.session_state.arquivo_aberto == arquivo:
-
-            if st.session_state.arquivo_aberto == arquivo:
-
-                st.markdown("""
-                    <a href="#folder-ampliado">
-                    <button style="
-                    background-color:blue;
-                    color:white;
-                    border:none;
-                    padding:10px 20px;
-                    border-radius:10px;
-                    cursor:pointer;
-                    font-size:16px;
-                    ">
-                    Ir para imagem ampliada
-                    </button>
-                    </a>
-                     """, unsafe_allow_html=True
-                     )
+        if st.session_state.imagem_aberta == url_imagem:
+            st.markdown("""
+                <a href="#folder-ampliado">
+                <button style="
+                background-color:blue;
+                color:white;
+                border:none;
+                padding:10px 20px;
+                border-radius:10px;
+                cursor:pointer;
+                font-size:16px;
+                ">
+                Ir para imagem ampliada
+                </button>
+                </a>
+            """, unsafe_allow_html=True)
 
         if admin_logado:
-            nova_imagem = st.file_uploader(
-                f"Atualizar {arquivo}",
-                type=["jpg", "jpeg", "png", "webp"],
-                key=f"upload_{arquivo}"
-            )
+            if st.button("Remover", key=f"remover_{i}"):
+                remover_imagem_da_planilha(linha_planilha)
 
-            if nova_imagem:
-                with open(caminho, "wb") as f:
-                    f.write(nova_imagem.getbuffer())
-
-                st.success("Imagem atualizada!")
-                st.rerun()
-
-            if st.button("Remover", key=f"remover_{arquivo}"):
-                os.remove(caminho)
-
-                if st.session_state.imagem_aberta == caminho:
+                if st.session_state.imagem_aberta == url_imagem:
                     st.session_state.imagem_aberta = None
+                    st.session_state.nome_aberto = None
 
-                st.success("Imagem removida!")
+                st.success("Imagem removida do site!")
                 st.rerun()
+
 
 if st.session_state.imagem_aberta:
-
     st.divider()
 
     st.markdown(
@@ -127,8 +182,7 @@ if st.session_state.imagem_aberta:
         unsafe_allow_html=True
     )
 
-    st.markdown(
-    """
+    st.markdown("""
     <h1 style='
     color:black;
     padding:20px;
@@ -139,16 +193,9 @@ if st.session_state.imagem_aberta:
     '>
     Foto Ampliada
     </h1>
-    """,
-    unsafe_allow_html=True
-)
-
-    imagem_grande = Image.open(
-        st.session_state.imagem_aberta
-    )
+    """, unsafe_allow_html=True)
 
     st.image(
-        imagem_grande,
+        st.session_state.imagem_aberta,
         width="stretch"
     )
-    
