@@ -110,7 +110,21 @@ if admin_logado:
     )
 
     if arquivos_enviados:
+        imagens_existentes = carregar_imagens()
+
+        nomes_existentes = [
+            imagem.get("nome", "")
+            for imagem in imagens_existentes
+        ]
+
+        adicionadas = 0
+        ignoradas = 0
+
         for arquivo in arquivos_enviados:
+            if arquivo.name in nomes_existentes:
+                ignoradas += 1
+                continue
+
             dados_imagem = enviar_para_imgbb(arquivo)
 
             if dados_imagem:
@@ -120,7 +134,15 @@ if admin_logado:
                     dados_imagem["nome"]
                 )
 
-        st.success("Folders adicionados com sucesso!")
+                nomes_existentes.append(arquivo.name)
+                adicionadas += 1
+
+        if adicionadas > 0:
+            st.success(f"{adicionadas} folder(s) adicionados com sucesso!")
+
+        if ignoradas > 0:
+            st.warning(f"{ignoradas} folder(s) já existiam e foram ignorados.")
+
         st.rerun()
 
 
