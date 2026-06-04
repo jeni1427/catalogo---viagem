@@ -1,1 +1,5 @@
-
+streamlit
+pillow
+requests
+gspread
+google-auth
